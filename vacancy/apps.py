@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class CreatedbConfig(AppConfig):
+class VacancyConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'createDb'
+    name = 'vacancy'
