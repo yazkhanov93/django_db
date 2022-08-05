@@ -1,6 +1,12 @@
 from rest_framework import serializers
-from account.models import User, UserProfile, CompanyProfile
+from account.models import User, UserProfile, CompanyProfile, Region
 from rest_framework_simplejwt.tokens import RefreshToken
+
+
+class RegionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Region
+        fields = '__all__'
 
 
 class UserSerializer(serializers.ModelSerializer):

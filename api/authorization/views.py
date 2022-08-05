@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.auth.hashers import make_password
-
+from rest_framework.permissions import IsAuthenticated
 
 from account.models import User, UserProfile, CompanyProfile
 from .serializers import UserSerializer, UserSerializerWithToken, UserProfileSerializer, CompanyProfileSerializer
@@ -42,6 +42,7 @@ def registerUser(request):
 
 
 class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
             profile = UserProfile.objects.all()
@@ -51,15 +52,29 @@ class UserProfileView(APIView):
             return Response({"detail":"No Profiles"})
 
     def post(self, request):
-        serializer = UserProfileSerializer(data=request.data)
+        data = request.data
+        data["user"] = request.user.id
+        serializer = UserProfileSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
         else:
             return Response(serializer.errors)
-        return Response({"detail":"Profile created successfully"})
-       
+        return Response({"detail":"Profile created successfully"}) 
+
+    def put(self, request):
+        try:
+            data= request.data
+            serializer = UserProfileSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response(serializer.errors)
+            return Response(serializer.data)
+        except:
+            return Response({"detail":"Please try again..."})
 
 class UserProfileDetail(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         try:
             profile = UserProfile.objects.get(id=pk)
@@ -68,17 +83,7 @@ class UserProfileDetail(APIView):
         except:
             return Response({"detail":"Profile not found"})
 
-    def put(self, request, pk):
-        try:
-            profile = UserProfile.objects.get(id=pk)
-            serializer = UserProfileSerializer(profile, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            else:
-                return Response(serializer.errors)
-        except:
-            return Response({"detail":"Please try again..."})
+    
 
     def delete(self, request, pk):
         profile = UserProfile.objects.get(id=pk)
